@@ -6,6 +6,7 @@ using System.Linq;
 using System.Globalization;
 using ParquetSharp;
 using System.Threading.Tasks;
+using System.Text.RegularExpressions;
 
 
 namespace Task_1
@@ -76,12 +77,19 @@ namespace Task_1
         //פונקציה שמדפיסה את N השכיחויות
         public static void PrintN(Dictionary<string, int> dictionary, int N)
         {
-            var topN = dictionary.OrderByDescending(x => x.Value).Take(N);
-
-            Console.WriteLine($"Top {N} Error Codes:");
-            foreach (var item in topN)
+            if (N > dictionary.Count())
             {
-                Console.WriteLine($"{item.Key}: {item.Value}");
+                Console.WriteLine("There are less then N errors");
+            }
+            else
+            {
+                var topN = dictionary.OrderByDescending(x => x.Value).Take(N);
+
+                Console.WriteLine($"Top {N} Error Codes:");
+                foreach (var item in topN)
+                {
+                    Console.WriteLine($"{item.Key}: {item.Value}");
+                }
             }
         }
         //פונקציה שמפעילה את כל המשימות של סעיף א
@@ -102,8 +110,16 @@ namespace Task_1
         public static bool Validation(string line)
         {
             string[] parts = line.Split(',');
-            return parts.Length == 2 && DateTime.TryParse(parts[0], out _) && double.TryParse(parts[1], out _);
+            if (parts.Length != 2) return false;
+
+            string datePattern = @"^(0[1-9]|[12][0-9]|3[01])/(0[1-9]|1[0-2])/\d{4}$";
+            if (!Regex.IsMatch(parts[0], datePattern)) return false;
+
+            if (!double.TryParse(parts[1], out _)) return false;
+
+            return true;
         }
+
         //פונקציה למציאת ממוצע שעתי
         public static Dictionary<string, double> AvgHours(string filePath)
         {
@@ -118,7 +134,7 @@ namespace Task_1
                     sumAndCountDict[hourKey] = (0, 0);
                 sumAndCountDict[hourKey] = (sumAndCountDict[hourKey].sum + value, sumAndCountDict[hourKey].count + 1);
             }
-            
+
             foreach (var entry in sumAndCountDict.OrderBy(e => e.Key))
             {
                 double average = entry.Value.sum / entry.Value.count;
@@ -133,7 +149,7 @@ namespace Task_1
             var data = ReadTimeSeries(inputPath);
             string ext = Path.GetExtension(inputPath).ToLower();
             var chunksByDay = new Dictionary<string, List<(DateTime, double)>>();
-            
+
             foreach (var (timestamp, value) in data)
             {
                 string dayKey = timestamp.ToString("yyyy-MM-dd");
@@ -258,10 +274,10 @@ namespace Task_1
                 {
                     using var rowGroupReader = fileReader.RowGroup(i);
                     int rowCount = (int)rowGroupReader.MetaData.NumRows;
-                    
+
                     DateTime[] timestamps;
                     double[] values;
-                    
+
                     try
                     {
                         timestamps = rowGroupReader.Column(0).LogicalReader<DateTime>().ReadAll(rowCount);
@@ -302,8 +318,8 @@ namespace Task_1
         public static void ProcessB(string fileCsv, string fileParquet)
         {
             string workDir = @"C:\Users\This User\Documents\Studies\הדסים\Task 1\Files";
-            SpliteFileByDay(fileCsv,workDir);
-            SpliteFileByDay(fileParquet,workDir);
+            SpliteFileByDay(fileCsv, workDir);
+            SpliteFileByDay(fileParquet, workDir);
             MergeAllAvgHours(workDir);
         }
 

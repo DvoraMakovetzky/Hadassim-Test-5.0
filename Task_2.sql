@@ -1,6 +1,6 @@
 USE Family;
 GO
---ϊψβιμ 1: ιφιψϊ θαμϊ χψεαιν
+--ΧªΧ¨Χ’Χ™Χ 1: Χ™Χ¦Χ™Χ¨Χª ΧΧ‘ΧΧª Χ§Χ¨Χ•Χ‘Χ™Χ
 CREATE TABLE Relatives (
     Id INT IDENTITY PRIMARY KEY,
     PersonId INT,
@@ -8,38 +8,38 @@ CREATE TABLE Relatives (
     ConnectionType NVARCHAR(20)
 );
 INSERT INTO Relatives (PersonId, RelativeId, ConnectionType)
-SELECT PersonId, FatherId, 'ΰα'
+SELECT PersonId, FatherId, 'ΧΧ‘'
 FROM People
 WHERE FatherId IS NOT NULL
 UNION ALL
-SELECT PersonId, MotherId, 'ΰν'
+SELECT PersonId, MotherId, 'ΧΧ'
 FROM People
 WHERE MotherId IS NOT NULL
 UNION ALL
 SELECT PersonId, SpouseId,
-       CASE Gender WHEN 'ζλψ' THEN 'αϊ ζεβ' ELSE 'αο ζεβ' END
+       CASE Gender WHEN 'Χ–Χ›Χ¨' THEN 'Χ‘Χª Χ–Χ•Χ’' ELSE 'Χ‘Χ Χ–Χ•Χ’' END
 FROM People
 WHERE SpouseId IS NOT NULL
 UNION ALL
 SELECT FatherId, PersonId,
-       CASE Gender WHEN 'ζλψ' THEN 'αο' ELSE 'αϊ' END
+       CASE Gender WHEN 'Χ–Χ›Χ¨' THEN 'Χ‘Χ' ELSE 'Χ‘Χª' END
 FROM People
 WHERE FatherId IS NOT NULL
 UNION ALL
 SELECT MotherId, PersonId,
-       CASE Gender WHEN 'ζλψ' THEN 'αο' ELSE 'αϊ' END
+       CASE Gender WHEN 'Χ–Χ›Χ¨' THEN 'Χ‘Χ' ELSE 'Χ‘Χª' END
 FROM People
 WHERE MotherId IS NOT NULL
 UNION ALL
 SELECT p1.PersonId, p2.PersonId,
-       CASE p2.Gender WHEN 'ζλψ' THEN 'ΰη' ELSE 'ΰηεϊ' END
+       CASE p2.Gender WHEN 'Χ–Χ›Χ¨' THEN 'ΧΧ—' ELSE 'ΧΧ—Χ•Χª' END
 FROM People p1 JOIN People p2 
 ON p1.PersonId <> p2.PersonId AND (
         (p1.FatherId IS NOT NULL AND p1.FatherId = p2.FatherId) OR
         (p1.MotherId IS NOT NULL AND p1.MotherId = p2.MotherId)
     );
 
---  ϊψβιμ 2: δωμξϊ αο/αϊ ζεβ 
+--  ΧªΧ¨Χ’Χ™Χ 2: Χ”Χ©ΧΧΧª Χ‘Χ/Χ‘Χª Χ–Χ•Χ’ 
 UPDATE p2
 SET SpouseId = p1.PersonId
 FROM People p1
@@ -48,11 +48,11 @@ WHERE p2.SpouseId IS NULL;
 
 INSERT INTO Relatives (PersonId, RelativeId, ConnectionType)
 SELECT p.SpouseId, p.PersonId,
-       CASE p.Gender WHEN 'ζλψ' THEN 'αο ζεβ' ELSE 'αϊ ζεβ' END
+       CASE p.Gender WHEN 'Χ–Χ›Χ¨' THEN 'Χ‘Χ Χ–Χ•Χ’' ELSE 'Χ‘Χª Χ–Χ•Χ’' END
 FROM People p
 WHERE p.SpouseId IS NOT NULL
 AND NOT EXISTS (
     SELECT 1 FROM Relatives r
     WHERE r.PersonId = p.SpouseId AND r.RelativeId = p.PersonId
-          AND r.ConnectionType IN ('αο ζεβ', 'αϊ ζεβ')
+          AND r.ConnectionType IN ('Χ‘Χ Χ–Χ•Χ’', 'Χ‘Χª Χ–Χ•Χ’')
 );
